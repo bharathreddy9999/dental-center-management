@@ -1,38 +1,44 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const USERS = [
+  { id: '1', role: 'Admin', email: 'admin@entnt.in', password: 'admin123' },
+  { id: '2', role: 'Patient', email: 'john@entnt.in', password: 'patient123', patientId: 'p1' }
+];
 
 const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('authUser');
+    return stored ? JSON.parse(stored) : null;
+  });
 
-    useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser) {
-            setUser(storedUser);
-        }
-    }, []);
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('authUser', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('authUser');
+    }
+  }, [user]);
 
-    const login = (email, password) => {
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const foundUser = users.find(user => user.email === email && user.password === password);
-        if (foundUser) {
-            setUser(foundUser);
-            localStorage.setItem('user', JSON.stringify(foundUser));
-            return true;
-        }
-        return false;
-    };
+  const login = (email, password) => {
+    const found = USERS.find(u => u.email === email && u.password === password);
+    if (found) {
+      setUser(found);
+      return { success: true, user: found };
+    }
+    return { success: false };
+  };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('user');
-    };
+  const logout = () => setUser(null);
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-export { AuthContext, AuthProvider };
+export function useAuth() {
+  return useContext(AuthContext);
+} 

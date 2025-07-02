@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import MainLayout from './components/MainLayout';
+import PatientLayout from './components/PatientLayout';
 import PatientsTable from './components/PatientsTable';
 import IncidentManagement from './components/IncidentManagement';
 import PatientView from './components/PatientView';
@@ -246,7 +247,7 @@ function PatientPage() {
   const { id } = useParams();
   const { user } = useAuth();
   
-  // If admin, show incident management, if patient, show patient view
+  // If admin, show incident management with MainLayout, if patient, show patient view with PatientLayout
   if (user.role === 'Admin') {
     return <IncidentManagement patientId={id} />;
   } else {
@@ -260,26 +261,68 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function PatientRouteWrapper({ children }) {
+  const { user } = useAuth();
+  
+  if (user?.role === 'Admin') {
+    return <MainLayout>{children}</MainLayout>;
+  } else {
+    return <PatientLayout>{children}</PatientLayout>;
+  }
+}
+
 function AppRoutes() {
+  const { user } = useAuth();
+  
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
       <Route path="/patients" element={<ProtectedRoute><MainLayout><PatientsPage /></MainLayout></ProtectedRoute>} />
-      <Route path="/patients/:id" element={<ProtectedRoute><MainLayout><PatientPage /></MainLayout></ProtectedRoute>} />
+      <Route path="/patients/:id" element={
+        <ProtectedRoute>
+          <PatientRouteWrapper>
+            <PatientPage />
+          </PatientRouteWrapper>
+        </ProtectedRoute>
+      } />
       <Route path="/appointments" element={<ProtectedRoute><MainLayout><AppointmentsPage /></MainLayout></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute><MainLayout><CalendarPage /></MainLayout></ProtectedRoute>} />
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={
+        user ? (
+          user.role === 'Admin' ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to={`/patients/${user.patientId}`} replace />
+          )
+        ) : (
+          <Navigate to="/login" replace />
+        )
+      } />
+      <Route path="*" element={
+        user ? (
+          user.role === 'Admin' ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to={`/patients/${user.patientId}`} replace />
+          )
+        ) : (
+          <Navigate to="/login" replace />
+        )
+      } />
     </Routes>
   );
 }
 
 function App() {
+  // Get the base path for GitHub Pages deployment
+  const basename = process.env.NODE_ENV === 'production' ? '/dental-center-management' : '';
+  
   return (
     <ThemeProvider>
       <AuthProvider>
         <AppDataProvider>
-          <Router>
+          <Router basename={basename}>
             <AppRoutes />
           </Router>
         </AppDataProvider>

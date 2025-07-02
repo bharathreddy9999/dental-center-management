@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, FileText, DollarSign, Upload, File, Image, Trash2 } from 'lucide-react';
+import { X, Calendar, FileText, Upload, File, Image, Trash2 } from 'lucide-react';
 import { useAppData } from '../context/AppDataContext';
 
 export default function IncidentForm({ incident, patientId, onSave, onCancel }) {

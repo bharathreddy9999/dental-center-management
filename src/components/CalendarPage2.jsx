@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import IncidentForm from './IncidentForm';
 import { 
   ChevronLeft, ChevronRight, Plus, Calendar, Clock, User, 
@@ -77,19 +76,12 @@ const getStatusColor = (status) => {
 
 function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
   const { patients } = useAppData();
-  const { isDarkMode } = useTheme();
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden ${
-        isDarkMode ? 'bg-slate-800' : 'bg-white'
-      }`}>
-        <div className={`flex items-center justify-between p-6 border-b ${
-          isDarkMode ? 'border-slate-700' : 'border-gray-200'
-        }`}>
-          <h2 className={`text-xl font-bold ${
-            isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-bold text-gray-800">
             Appointments for {date.toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -99,9 +91,7 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
           </h2>
           <button
             onClick={onClose}
-            className={`p-2 rounded-full transition-colors ${
-              isDarkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-gray-100 text-gray-600'
-            }`}
+            className="p-2 hover:bg-gray-100 rounded-full"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,12 +100,8 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {appointments.length === 0 ? (
             <div className="text-center py-8">
-              <Calendar className={`w-16 h-16 mx-auto mb-4 ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-300'
-              }`} />
-              <p className={`mb-4 ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-500'
-              }`}>No appointments scheduled for this day</p>
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">No appointments scheduled for this day</p>
               <button
                 onClick={() => onNewAppointment(date)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -127,9 +113,7 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
-                <p className={`text-sm ${
-                  isDarkMode ? 'text-slate-400' : 'text-gray-600'
-                }`}>{appointments.length} appointment(s)</p>
+                <p className="text-sm text-gray-600">{appointments.length} appointment(s)</p>
                 <button
                   onClick={() => onNewAppointment(date)}
                   className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1"
@@ -198,7 +182,6 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
 export default function CalendarPage() {
   const { incidents, patients } = useAppData();
   const { user } = useAuth();
-  const { isDarkMode } = useTheme();
   const [view, setView] = useState('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -214,13 +197,13 @@ export default function CalendarPage() {
   const weekDates = getWeekDates(currentDate);
 
   // Get appointments for a specific date
-  const getAppointmentsForDate = useCallback((date) => {
+  const getAppointmentsForDate = (date) => {
     const dateStr = date.toDateString();
     return incidents.filter(incident => {
       const incidentDate = new Date(incident.appointmentDate);
       return incidentDate.toDateString() === dateStr;
     });
-  }, [incidents]);
+  };
 
   // Navigation functions
   const prevMonth = () => {
@@ -285,21 +268,15 @@ export default function CalendarPage() {
       upcomingTotal: upcomingCount,
       completedThisMonth: monthAppointments.filter(i => i.status === 'Completed').length
     };
-  }, [incidents, year, month, getAppointmentsForDate]);
+  }, [incidents, year, month]);
 
   const renderMonthView = () => (
-    <div className={`rounded-2xl shadow-lg overflow-hidden ${
-      isDarkMode ? 'bg-slate-800' : 'bg-white'
-    }`}>
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
       {/* Calendar Header */}
-      <div className={`px-6 py-4 ${
-        isDarkMode ? 'bg-slate-700' : 'bg-gray-50'
-      }`}>
+      <div className="bg-gray-50 px-6 py-4">
         <div className="grid grid-cols-7 gap-1">
           {WEEKDAYS.map(day => (
-            <div key={day} className={`text-center text-sm font-semibold py-2 ${
-              isDarkMode ? 'text-slate-300' : 'text-gray-600'
-            }`}>
+            <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
               {day}
             </div>
           ))}
@@ -314,30 +291,17 @@ export default function CalendarPage() {
               const isCurrentMonth = date.getMonth() === month;
               const isToday = date.toDateString() === new Date().toDateString();
               const appointments = getAppointmentsForDate(date);
+              const hasAppointments = appointments.length > 0;
 
               return (
                 <div
                   key={dayIdx}
-                  className={`min-h-[120px] p-2 border cursor-pointer transition-colors ${
-                    isDarkMode 
-                      ? 'border-slate-600 hover:bg-slate-700' 
-                      : 'border-gray-200 hover:bg-gray-50'
-                  } ${
-                    !isCurrentMonth 
-                      ? (isDarkMode ? 'bg-slate-900 text-slate-500' : 'bg-gray-50 text-gray-400') 
-                      : ''
-                  } ${
-                    isToday 
-                      ? (isDarkMode ? 'bg-blue-900/30 border-blue-500' : 'bg-blue-50 border-blue-300') 
-                      : ''
-                  }`}
+                  className={`min-h-[120px] p-2 border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    !isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
+                  } ${isToday ? 'bg-blue-50 border-blue-300' : ''}`}
                   onClick={() => handleDateClick(date)}
                 >
-                  <div className={`text-sm font-medium mb-1 ${
-                    isToday 
-                      ? (isDarkMode ? 'text-blue-400' : 'text-blue-600') 
-                      : (isDarkMode ? 'text-slate-200' : 'text-gray-900')
-                  }`}>
+                  <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-600' : ''}`}>
                     {date.getDate()}
                   </div>
                   
@@ -362,9 +326,7 @@ export default function CalendarPage() {
                     })}
                     
                     {appointments.length > 3 && (
-                      <div className={`text-xs px-2 ${
-                        isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                      }`}>
+                      <div className="text-xs text-gray-500 px-2">
                         +{appointments.length - 3} more
                       </div>
                     )}
@@ -379,34 +341,17 @@ export default function CalendarPage() {
   );
 
   const renderWeekView = () => (
-    <div className={`rounded-2xl shadow-lg overflow-hidden ${
-      isDarkMode ? 'bg-slate-800' : 'bg-white'
-    }`}>
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
       {/* Week Header */}
-      <div className={`px-6 py-4 ${
-        isDarkMode ? 'bg-slate-700' : 'bg-gray-50'
-      }`}>
+      <div className="bg-gray-50 px-6 py-4">
         <div className="grid grid-cols-8 gap-4">
-          <div className={`text-sm font-semibold ${
-            isDarkMode ? 'text-slate-300' : 'text-gray-600'
-          }`}>Time</div>
+          <div className="text-sm font-semibold text-gray-600">Time</div>
           {weekDates.map((date, idx) => {
             const isToday = date.toDateString() === new Date().toDateString();
             return (
-              <div key={idx} className={`text-center ${
-                isToday 
-                  ? (isDarkMode ? 'text-blue-400' : 'text-blue-600') 
-                  : (isDarkMode ? 'text-slate-300' : 'text-gray-700')
-              }`}>
+              <div key={idx} className={`text-center ${isToday ? 'text-blue-600' : ''}`}>
                 <div className="text-sm font-semibold">{WEEKDAYS[idx]}</div>
-                <div className={`text-lg font-bold ${
-                  isToday 
-                    ? (isDarkMode 
-                        ? 'bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto' 
-                        : 'bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto'
-                      ) 
-                    : ''
-                }`}>
+                <div className={`text-lg font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto' : ''}`}>
                   {date.getDate()}
                 </div>
               </div>
@@ -423,9 +368,7 @@ export default function CalendarPage() {
             {Array.from({ length: 12 }, (_, i) => {
               const hour = i + 8; // Start from 8 AM
               return (
-                <div key={i} className={`text-xs h-12 flex items-start ${
-                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                }`}>
+                <div key={i} className="text-xs text-gray-500 h-12 flex items-start">
                   {hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`}
                 </div>
               );
@@ -471,34 +414,24 @@ export default function CalendarPage() {
   );
 
   return (
-    <div className={`min-h-screen p-6 ${
-      isDarkMode 
-        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-        : 'bg-gradient-to-br from-blue-50 via-white to-indigo-50'
-    }`}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className={`text-3xl font-bold mb-2 ${
-              isDarkMode ? 'text-white' : 'text-gray-800'
-            }`}>Calendar</h1>
-            <p className={isDarkMode ? 'text-slate-400' : 'text-gray-600'}>
-              View and manage appointments
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Calendar</h1>
+            <p className="text-gray-600">View and manage appointments</p>
           </div>
           
           {/* View Toggle */}
           <div className="flex items-center space-x-4">
-            <div className={`rounded-lg p-1 shadow ${
-              isDarkMode ? 'bg-slate-700' : 'bg-white'
-            }`}>
+            <div className="bg-white rounded-lg p-1 shadow">
               <button
                 onClick={() => setView('month')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'month' 
                     ? 'bg-blue-600 text-white' 
-                    : (isDarkMode ? 'text-slate-300 hover:bg-slate-600' : 'text-gray-600 hover:bg-gray-100')
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 Month
@@ -508,7 +441,7 @@ export default function CalendarPage() {
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'week' 
                     ? 'bg-blue-600 text-white' 
-                    : (isDarkMode ? 'text-slate-300 hover:bg-slate-600' : 'text-gray-600 hover:bg-gray-100')
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 Week
@@ -520,53 +453,37 @@ export default function CalendarPage() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className={`rounded-xl p-6 shadow-lg ${
-          isDarkMode ? 'bg-slate-800' : 'bg-white'
-        }`}>
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Today's Appointments</p>
+              <p className="text-sm text-gray-600">Today's Appointments</p>
               <p className="text-2xl font-bold text-blue-600">{stats.todayTotal}</p>
             </div>
             <Calendar className="w-8 h-8 text-blue-500" />
           </div>
         </div>
-        <div className={`rounded-xl p-6 shadow-lg ${
-          isDarkMode ? 'bg-slate-800' : 'bg-white'
-        }`}>
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>This Month</p>
+              <p className="text-sm text-gray-600">This Month</p>
               <p className="text-2xl font-bold text-green-600">{stats.monthTotal}</p>
             </div>
             <Calendar className="w-8 h-8 text-green-500" />
           </div>
         </div>
-        <div className={`rounded-xl p-6 shadow-lg ${
-          isDarkMode ? 'bg-slate-800' : 'bg-white'
-        }`}>
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Upcoming</p>
+              <p className="text-sm text-gray-600">Upcoming</p>
               <p className="text-2xl font-bold text-purple-600">{stats.upcomingTotal}</p>
             </div>
             <Clock className="w-8 h-8 text-purple-500" />
           </div>
         </div>
-        <div className={`rounded-xl p-6 shadow-lg ${
-          isDarkMode ? 'bg-slate-800' : 'bg-white'
-        }`}>
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Completed</p>
+              <p className="text-sm text-gray-600">Completed</p>
               <p className="text-2xl font-bold text-orange-600">{stats.completedThisMonth}</p>
             </div>
             <Calendar className="w-8 h-8 text-orange-500" />
@@ -579,29 +496,19 @@ export default function CalendarPage() {
         <div className="flex items-center space-x-4">
           <button
             onClick={view === 'month' ? prevMonth : prevWeek}
-            className={`p-2 rounded-lg transition-colors shadow ${
-              isDarkMode 
-                ? 'hover:bg-slate-700 text-slate-300' 
-                : 'hover:bg-white text-gray-700'
-            }`}
+            className="p-2 hover:bg-white rounded-lg transition-colors shadow"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={view === 'month' ? nextMonth : nextWeek}
-            className={`p-2 rounded-lg transition-colors shadow ${
-              isDarkMode 
-                ? 'hover:bg-slate-700 text-slate-300' 
-                : 'hover:bg-white text-gray-700'
-            }`}
+            className="p-2 hover:bg-white rounded-lg transition-colors shadow"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
         
-        <h2 className={`text-xl font-bold ${
-          isDarkMode ? 'text-white' : 'text-gray-800'
-        }`}>
+        <h2 className="text-xl font-bold text-gray-800">
           {view === 'month' 
             ? `${MONTHS[month]} ${year}`
             : `Week of ${weekDates[0].toLocaleDateString()}`

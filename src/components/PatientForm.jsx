@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Phone, Mail, MapPin, Heart, Shield, Calendar, Users } from 'lucide-react';
+import { X, User, Phone, Heart } from 'lucide-react';
 
 export default function PatientForm({ patient, onSave, onCancel }) {
   const [formData, setFormData] = useState({

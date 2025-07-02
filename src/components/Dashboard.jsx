@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppData } from '../context/AppDataContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -7,15 +7,12 @@ import TopPatientsCard from './TopPatientsCard';
 import { 
   Users, 
   Calendar, 
-  TrendingUp,
   Clock,
   UserPlus,
   DollarSign,
-  Activity,
   AlertCircle,
   CheckCircle,
   XCircle,
-  BarChart3,
   PieChart,
   ArrowUpRight,
   ArrowDownRight
@@ -25,8 +22,6 @@ export default function Dashboard() {
   const { patients, incidents } = useAppData();
   const { user } = useAuth();
   const { isDarkMode } = useTheme();
-  const [selectedTimeRange, setSelectedTimeRange] = useState('month');
-  const [refreshing, setRefreshing] = useState(false);
 
   // Calculate dashboard metrics
   const totalPatients = patients.length;
@@ -57,13 +52,6 @@ export default function Dashboard() {
     { month: 'May', revenue: 42000, patients: 65, appointments: 105 },
     { month: 'Jun', revenue: Math.max(totalRevenue, 38000), patients: totalPatients, appointments: totalAppointments },
   ];
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
-  };
 
   const StatCard = ({ title, value, icon: Icon, color, change, trend, description, delay = 0 }) => (
     <div className={`group relative rounded-2xl shadow-sm p-6 border hover:shadow-xl transition-all duration-500 hover:-translate-y-1 animate-fade-in ${

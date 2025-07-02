@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import jsPDF from 'jspdf';
-import { UserRound, CalendarClock, Hourglass, CheckCircle2, DollarSign } from 'lucide-react';
+import { CalendarClock, Hourglass, CheckCircle2 } from 'lucide-react';
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -55,21 +55,11 @@ function AppointmentModal({ initial, patients, onSave, onCancel }) {
   const [costItem, setCostItem] = useState({ label: '', amount: '' });
   const [uploadedFiles, setUploadedFiles] = useState(initial?.files || []);
   const [noteInput, setNoteInput] = useState('');
-  const [discount, setDiscount] = useState(0);
-  const [paid, setPaid] = useState(false);
   const [customTitle, setCustomTitle] = useState('');
+  const [discount] = useState(0);
+  const [paid] = useState(false);
 
-  // Cost breakdown
-  const addCostItem = () => {
-    if (costItem.label && costItem.amount) {
-      setForm(f => ({ ...f, costItems: [...(f.costItems || []), { ...costItem }] }));
-      setCostItem({ label: '', amount: '' });
-    }
-  };
-  const removeCostItem = idx => {
-    setForm(f => ({ ...f, costItems: f.costItems.filter((_, i) => i !== idx) }));
-  };
-  const totalCost = (form.costItems || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0) - parseFloat(discount || 0);
+  const totalCost = (form.costItems || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
 
   // File upload
   const handleFileUpload = (e) => {
@@ -102,18 +92,6 @@ function AppointmentModal({ initial, patients, onSave, onCancel }) {
       setForm(f => ({ ...f, notes: f.notes ? `${f.notes}\n${newNote}` : newNote }));
       setNoteInput('');
     }
-  };
-
-  // Smart treatment suggestions
-  const getSuggestions = () => {
-    const lowerTitle = (form.title || '').toLowerCase();
-    for (const entry of treatmentSuggestions) {
-      if (lowerTitle.includes(entry.keyword)) return entry.suggestions;
-    }
-    return [];
-  };
-  const insertSuggestion = suggestion => {
-    setForm(f => ({ ...f, description: f.description ? `${f.description}, ${suggestion}` : suggestion }));
   };
 
   // Invoice generation

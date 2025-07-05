@@ -1,22 +1,16 @@
 {
   "files": {
-    "main.css": "/dental-center-management/static/css/main.368bec31.css",
-    "main.js": "/dental-center-management/static/js/main.a68446f6.js",
-    "static/js/239.bdb83e4c.chunk.js": "/dental-center-management/static/js/239.bdb83e4c.chunk.js",
-    "static/js/977.da0249b0.chunk.js": "/dental-center-management/static/js/977.da0249b0.chunk.js",
-    "static/js/455.0345eb18.chunk.js": "/dental-center-management/static/js/455.0345eb18.chunk.js",
-    "static/js/488.aad40b05.chunk.js": "/dental-center-management/static/js/488.aad40b05.chunk.js",
+    "main.css": "/dental-center-management/static/css/main.af69d66a.css",
+    "main.js": "/dental-center-management/static/js/main.b322884b.js",
+    "static/js/488.2ac5538a.chunk.js": "/dental-center-management/static/js/488.2ac5538a.chunk.js",
     "service-worker.js": "/dental-center-management/service-worker.js",
     "index.html": "/dental-center-management/index.html",
-    "main.368bec31.css.map": "/dental-center-management/static/css/main.368bec31.css.map",
-    "main.a68446f6.js.map": "/dental-center-management/static/js/main.a68446f6.js.map",
-    "239.bdb83e4c.chunk.js.map": "/dental-center-management/static/js/239.bdb83e4c.chunk.js.map",
-    "977.da0249b0.chunk.js.map": "/dental-center-management/static/js/977.da0249b0.chunk.js.map",
-    "455.0345eb18.chunk.js.map": "/dental-center-management/static/js/455.0345eb18.chunk.js.map",
-    "488.aad40b05.chunk.js.map": "/dental-center-management/static/js/488.aad40b05.chunk.js.map"
+    "main.af69d66a.css.map": "/dental-center-management/static/css/main.af69d66a.css.map",
+    "main.b322884b.js.map": "/dental-center-management/static/js/main.b322884b.js.map",
+    "488.2ac5538a.chunk.js.map": "/dental-center-management/static/js/488.2ac5538a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.368bec31.css",
-    "static/js/main.a68446f6.js"
+    "static/css/main.af69d66a.css",
+    "static/js/main.b322884b.js"
   ]
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { useTheme } from '../context/ThemeContext';
 import IncidentForm from './IncidentForm';
 import { 
   Calendar, 
@@ -8,41 +9,26 @@ import {
   AlertCircle, 
   Plus,
   Search,
-  Filter,
-  Edit3,
-  Trash2
+  Edit3
 } from 'lucide-react';
 
 export default function IncidentManagement({ patientId }) {
-  const { patients, incidents, addIncident, updateIncident, deleteIncident } = useAppData();
+  const { patients, incidents, addIncident, updateIncident } = useAppData();
+  const { isDarkMode } = useTheme();
   const [showForm, setShowForm] = useState(false);
   const [editingIncident, setEditingIncident] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [sortBy, setSortBy] = useState('date');
 
   // Filter incidents for specific patient if patientId is provided
   const filteredIncidents = incidents.filter(incident => {
     if (patientId && incident.patientId !== patientId) return false;
     if (searchTerm && !incident.treatment.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    if (statusFilter !== 'All' && incident.status !== statusFilter) return false;
     return true;
   });
 
-  // Sort incidents
+  // Sort incidents by date (newest first)
   const sortedIncidents = [...filteredIncidents].sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(b.date) - new Date(a.date);
-      case 'treatment':
-        return a.treatment.localeCompare(b.treatment);
-      case 'status':
-        return a.status.localeCompare(b.status);
-      case 'cost':
-        return parseFloat(b.cost || 0) - parseFloat(a.cost || 0);
-      default:
-        return 0;
-    }
+    return new Date(b.appointmentDate) - new Date(a.appointmentDate);
   });
 
   // Get patient info if viewing single patient
@@ -83,83 +69,61 @@ export default function IncidentManagement({ patientId }) {
     setShowForm(true);
   };
 
-  const handleDeleteIncident = (incidentId) => {
-    if (window.confirm('Are you sure you want to delete this appointment?')) {
-      deleteIncident(incidentId);
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {currentPatient ? `${currentPatient.name}'s Appointments` : 'Appointment Management'}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {currentPatient 
-              ? `Manage appointments for ${currentPatient.name}`
-              : 'Manage all patient appointments and treatments'
-            }
-          </p>
+      <div className={`rounded-2xl p-6 shadow-lg ${
+        isDarkMode ? 'bg-slate-800' : 'bg-white'
+      }`}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className={`text-2xl font-bold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              {currentPatient ? `${currentPatient.name}'s Appointments` : 'Appointment Management'}
+            </h1>
+            <p className={`text-sm ${
+              isDarkMode ? 'text-slate-400' : 'text-gray-600'
+            }`}>
+              {currentPatient 
+                ? `Manage appointments for ${currentPatient.name}`
+                : 'Manage all patient appointments and treatments'
+              }
+            </p>
+          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Appointment</span>
+          </button>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New Appointment
-        </button>
-      </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
+        {/* Search */}
+        <div className="mt-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-slate-400' : 'text-gray-400'
+            }`} />
             <input
               type="text"
               placeholder="Search treatments..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full pl-10 pr-4 py-2 rounded-lg border transition-colors ${
+                isDarkMode 
+                  ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400' 
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+              }`}
             />
           </div>
-
-          {/* Status Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-            >
-              <option value="All">All Status</option>
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          {/* Sort By */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="date">Sort by Date</option>
-            <option value="treatment">Sort by Treatment</option>
-            <option value="status">Sort by Status</option>
-            <option value="cost">Sort by Cost</option>
-          </select>
         </div>
       </div>
-
       {/* Appointments List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className={`rounded-2xl shadow-lg overflow-hidden ${
+        isDarkMode ? 'bg-slate-800' : 'bg-white'
+      }`}>
         {sortedIncidents.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -238,21 +202,18 @@ export default function IncidentManagement({ patientId }) {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ₹{incident.cost || '0.00'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEditIncident(incident)}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteIncident(incident.id)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => handleEditIncident(incident)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDarkMode 
+                              ? 'hover:bg-slate-600 text-slate-400 hover:text-slate-200' 
+                              : 'hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+                          }`}
+                          title="Edit appointment"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   );

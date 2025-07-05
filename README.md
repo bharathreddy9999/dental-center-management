@@ -1,10 +1,10 @@
-# 🦷 Dental Center Management System
+# 🦷 Dental Center Management System - ENTNT Assignment
 
-A comprehensive, professional dental practice management solution built with React, featuring role-based access, patient management, appointment scheduling, and financial tracking.
+A comprehensive, professional dental practice management solution built with React for the ENTNT Technical Assignment, featuring role-based access, patient management, appointment scheduling, and financial tracking.
 
-## 🌟 Overview
+## 🌟 Project Overview
 
-This modern dental management system provides a complete digital solution for dental practices, offering separate interfaces for administrators and patients. The system emphasizes user experience with a beautiful gold-themed design, dark mode support, and responsive layouts that work seamlessly across all devices.
+This modern dental management system is developed specifically for ENTNT's technical assessment requirements. It provides a complete digital solution for dental practices with separate interfaces for administrators and patients, emphasizing clean code architecture, user experience, and professional design with a gold-themed UI, dark mode support, and fully responsive layouts.
 
 ## � Key Features
 
@@ -437,12 +437,70 @@ npm run build
 
 This project is created for the ENTNT Technical Assignment and is intended for evaluation purposes.
 
+## � ENTNT Assignment Submission
+
+### **Live Demo**
+- **Deployment URL**: https://bharathreddy9999.github.io/dental-center-management/
+- **GitHub Repository**: https://github.com/bharathreddy9999/dental-center-management
+
+### **Demo Credentials**
+#### **Administrator Access**
+- **Email**: admin@entnt.in
+- **Password**: admin123
+- **Features**: Full system access with patient management, appointments, calendar, file uploads, and analytics
+
+#### **Patient Access**
+- **Email**: john@entnt.in
+- **Password**: patient123
+- **Features**: Personal dashboard with appointment history and treatment records
+
+### **Assignment Requirements Fulfilled**
+✅ **Simulated Authentication**: Hardcoded users with role-based access  
+✅ **Data Persistence**: All data stored in localStorage  
+✅ **File Uploads**: Admin can upload files and invoices post-appointment  
+✅ **Role-Based Access**: Admin vs Patient interfaces with proper restrictions  
+✅ **Calendar Integration**: Interactive calendar with appointment visualization  
+✅ **Dashboard KPIs**: Revenue, patients, appointments, and treatment metrics  
+✅ **Patient Management**: Complete CRUD operations with search and filtering  
+✅ **Incident/Appointment Management**: Full lifecycle management with status tracking  
+✅ **Responsive Design**: Mobile-first design that works across all devices  
+✅ **Professional UI/UX**: Gold theme with dark mode and smooth animations  
+✅ **Form Validation**: Comprehensive input validation and error handling  
+✅ **Reusable Components**: Modular architecture with context-based state management  
+
+### **Technical Highlights**
+- **Framework**: React 19+ with functional components and hooks
+- **Styling**: TailwindCSS for responsive design and professional appearance
+- **State Management**: Context API for global state with localStorage persistence
+- **Routing**: React Router for SPA navigation with protected routes
+- **Icons**: Lucide React for consistent iconography
+- **Charts**: Recharts for revenue analytics and data visualization
+- **Build**: Create React App with optimized production builds
+
+### **Deployment Instructions**
+```bash
+# Clone and setup
+git clone https://github.com/bharathreddy9999/dental-center-management.git
+cd dental-center-management
+npm install
+
+# Development
+npm start  # Runs on http://localhost:3000/dental-center-management
+
+# Production Build
+npm run build
+
+# Deploy to GitHub Pages
+npm run deploy
+```
+
 ## 📞 Contact
 
-For questions about this project, please contact:
-- **Email**: [Your Email]
-- **GitHub**: [Your GitHub Profile]
+**Submission Details**:
+- **Email**: hr@entnt.in
+- **GitHub**: https://github.com/bharathreddy9999/dental-center-management
+- **Live Demo**: https://bharathreddy9999.github.io/dental-center-management/
 
 ---
 
-**Note**: This is a demonstration project created for the ENTNT Technical Assignment. All patient data is fictional and for demonstration purposes only.
+**Note**: This is a demonstration project created for the ENTNT Technical Assignment. All patient data is fictional and for demonstration purposes only. The application demonstrates production-ready code quality, architecture, and user experience suitable for real-world dental practice management.

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import PatientForm from './PatientForm';
 import { 
@@ -20,6 +21,7 @@ const getAge = (dob) => {
 
 export default function PatientsTable() {
   const { patients, addPatient, updatePatient } = useAppData();
+  const { user } = useAuth();
   const { isDarkMode } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);

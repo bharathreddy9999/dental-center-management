@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import IncidentForm from './IncidentForm';
 import { 
-  ChevronLeft, ChevronRight, Plus, Calendar, Clock, User, 
+  ChevronLeft, ChevronRight, Calendar, Clock, User, 
   Phone, DollarSign, FileText, X
 } from 'lucide-react';
 
@@ -113,16 +113,9 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
               <Calendar className={`w-16 h-16 mx-auto mb-4 ${
                 isDarkMode ? 'text-slate-400' : 'text-gray-300'
               }`} />
-              <p className={`mb-4 ${
+              <p className={`${
                 isDarkMode ? 'text-slate-400' : 'text-gray-500'
               }`}>No appointments scheduled for this day</p>
-              <button
-                onClick={() => onNewAppointment(date)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Schedule Appointment</span>
-              </button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -130,13 +123,6 @@ function AppointmentModal({ date, appointments, onClose, onNewAppointment }) {
                 <p className={`text-sm ${
                   isDarkMode ? 'text-slate-400' : 'text-gray-600'
                 }`}>{appointments.length} appointment(s)</p>
-                <button
-                  onClick={() => onNewAppointment(date)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add</span>
-                </button>
               </div>
               
               {appointments.map((appointment) => {

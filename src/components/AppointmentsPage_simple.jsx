@@ -1,9 +1,27 @@
 import React, { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
-
-import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Upload, FileText, X, Receipt } from 'lucide-react';
+import { CalendarClock, Hourglass, CheckCircle2 } from 'lucide-react';
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
+    case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
+    case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
+    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'Pending': return <Hourglass className="w-6 h-6 stroke-2 text-yellow-600" />;
+    case 'Completed': return <CheckCircle2 className="w-6 h-6 stroke-2 text-green-600" />;
+    case 'Cancelled': return <CalendarClock className="w-6 h-6 stroke-2 text-red-600" />;
+    case 'In Progress': return <CalendarClock className="w-6 h-6 stroke-2 text-blue-600" />;
+    default: return <CalendarClock className="w-6 h-6 stroke-2 text-slate-400" />;
+  }
+};
 
 const SERVICES = [
   { label: 'Dental Cleaning', price: 1500 },
@@ -24,7 +42,6 @@ const SERVICES = [
 
 export default function AppointmentsPage({ initial, onSave, onCancel }) {
   const { patients } = useAppData();
-  const { user } = useAuth();
   const { isDarkMode } = useTheme();
   
   const [form, setForm] = useState({
@@ -36,13 +53,8 @@ export default function AppointmentsPage({ initial, onSave, onCancel }) {
     status: 'Scheduled',
     cost: '',
     notes: '',
-    files: [],
     ...initial
   });
-
-  const [uploadedFiles, setUploadedFiles] = useState(initial?.files || []);
-
-  const isAdmin = user?.role === 'Admin';
 
   const handleServiceChange = (e) => {
     const selected = SERVICES.find(s => s.label === e.target.value);
@@ -53,75 +65,9 @@ export default function AppointmentsPage({ initial, onSave, onCancel }) {
     }));
   };
 
-  // File upload functionality
-  const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newFile = {
-          name: file.name,
-          url: reader.result,
-          type: file.type,
-          size: file.size,
-          uploadDate: new Date().toISOString()
-        };
-        setUploadedFiles(prev => [...prev, newFile]);
-        setForm(f => ({ ...f, files: [...(f.files || []), newFile] }));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeFile = (index) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-    setForm(f => ({ ...f, files: (f.files || []).filter((_, i) => i !== index) }));
-  };
-
-  // Generate invoice
-  const generateInvoice = () => {
-    const patient = patients.find(p => p.id === form.patientId);
-    const appointmentDate = new Date(form.appointmentDate);
-    
-    const invoiceContent = `
-DENTAL CARE CLINIC
-INVOICE
-
-Patient: ${patient?.name || 'N/A'}
-Email: ${patient?.email || 'N/A'}
-Phone: ${patient?.contact || 'N/A'}
-
-Date: ${appointmentDate.toLocaleDateString()}
-Time: ${form.appointmentTime}
-
-Treatment: ${form.title}
-Description: ${form.description || 'N/A'}
-
-Cost: ₹${form.cost || '0'}
-Status: ${form.status}
-
-Doctor's Notes:
-${form.notes || 'None'}
-
-Generated on: ${new Date().toLocaleString()}
-    `;
-
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `invoice_${patient?.name || 'patient'}_${appointmentDate.toISOString().split('T')[0]}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = {
-      ...form,
-      files: uploadedFiles
-    };
-    onSave(formData);
+    onSave(form);
   };
 
   return (
@@ -292,130 +238,24 @@ Generated on: ${new Date().toLocaleString()}
           />
         </div>
 
-        {/* File Upload Section - Admin Only */}
-        {isAdmin && (
-          <>
-            <div>
-              <label className={`block text-sm font-semibold mb-2 ${
-                isDarkMode ? 'text-slate-300' : 'text-gray-700'
-              }`}>
-                Attach Files (X-rays, Reports, etc.)
-              </label>
-              <div className={`border-2 border-dashed rounded-xl p-6 transition-colors ${
-                isDarkMode 
-                  ? 'border-slate-600 hover:border-slate-500' 
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}>
-                <div className="text-center">
-                  <Upload className={`mx-auto w-8 h-8 mb-2 ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-400'
-                  }`} />
-                  <label className={`cursor-pointer text-sm ${
-                    isDarkMode ? 'text-slate-300' : 'text-gray-600'
-                  }`}>
-                    <span className="text-amber-500 hover:text-amber-600">Click to upload</span> or drag and drop
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                  <p className={`text-xs mt-1 ${
-                    isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                  }`}>
-                    PDF, JPG, PNG, DOC up to 10MB each
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Uploaded Files Display */}
-            {uploadedFiles.length > 0 && (
-              <div>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                }`}>
-                  Uploaded Files ({uploadedFiles.length})
-                </label>
-                <div className="space-y-2">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg border ${
-                      isDarkMode 
-                        ? 'border-slate-600 bg-slate-700' 
-                        : 'border-gray-200 bg-gray-50'
-                    }`}>
-                      <div className="flex items-center space-x-3">
-                        <FileText className={`w-5 h-5 ${
-                          isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                        }`} />
-                        <div>
-                          <p className={`text-sm font-medium ${
-                            isDarkMode ? 'text-white' : 'text-gray-900'
-                          }`}>{file.name}</p>
-                          <p className={`text-xs ${
-                            isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                          }`}>
-                            {(file.size / 1024).toFixed(1)} KB
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className={`p-1 rounded-full hover:bg-red-100 transition-colors ${
-                          isDarkMode ? 'text-slate-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
-                        }`}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        <div className="flex justify-between items-center pt-6">
-          <div className="flex space-x-3">
-            {/* Invoice Generation - Admin Only */}
-            {isAdmin && form.patientId && form.title && (
-              <button
-                type="button"
-                onClick={generateInvoice}
-                className={`px-4 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2 ${
-                  isDarkMode 
-                    ? 'bg-slate-600 text-slate-200 hover:bg-slate-500' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Receipt className="w-4 h-4" />
-                <span>Generate Invoice</span>
-              </button>
-            )}
-          </div>
-          
-          <div className="flex space-x-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-                isDarkMode 
-                  ? 'bg-slate-600 text-slate-200 hover:bg-slate-500' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-colors"
-            >
-              {initial ? 'Update' : 'Save'} Appointment
-            </button>
-          </div>
+        <div className="flex justify-end space-x-4 pt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+              isDarkMode 
+                ? 'bg-slate-600 text-slate-200 hover:bg-slate-500' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-colors"
+          >
+            {initial ? 'Update' : 'Save'} Appointment
+          </button>
         </div>
       </form>
     </div>

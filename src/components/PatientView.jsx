@@ -12,11 +12,11 @@ import {
   Heart,
   FileText,
   DollarSign,
-  Download,
   CheckCircle,
   AlertCircle,
   Hourglass,
-  CalendarClock
+  CalendarClock,
+  Download
 } from 'lucide-react';
 
 const getStatusColor = (status) => {
@@ -41,9 +41,9 @@ const getStatusIcon = (status) => {
   }
 };
 
-function FileViewer({ file }) {
+function FileViewer({ file, isAdmin }) {
   const { isDarkMode } = useTheme();
-  
+
   const downloadFile = () => {
     const link = document.createElement('a');
     link.href = file.url;
@@ -68,20 +68,23 @@ function FileViewer({ file }) {
               isDarkMode ? 'text-slate-400' : 'text-gray-500'
             }`}>
               {file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'File'}
+              {file.uploadDate && ` • ${new Date(file.uploadDate).toLocaleDateString()}`}
             </p>
           </div>
         </div>
-        <button
-          onClick={downloadFile}
-          className={`p-2 rounded-lg transition-colors ${
-            isDarkMode 
-              ? 'hover:bg-slate-600 text-slate-400 hover:text-slate-200' 
-              : 'hover:bg-gray-200 text-gray-500 hover:text-gray-700'
-          }`}
-          title="Download file"
-        >
-          <Download className="w-4 h-4" />
-        </button>
+        {isAdmin && (
+          <button
+            onClick={downloadFile}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode 
+                ? 'hover:bg-slate-600 text-slate-400 hover:text-slate-200' 
+                : 'hover:bg-gray-200 text-gray-500 hover:text-gray-700'
+            }`}
+            title="Download file"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -134,22 +137,6 @@ export default function PatientView({ patientId }) {
     }
   }, [patientAppointments, filter]);
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const now = new Date();
-    const upcoming = patientAppointments.filter(apt => 
-      new Date(apt.appointmentDate) > now && 
-      (apt.status === 'Scheduled' || apt.status === 'In Progress')
-    ).length;
-    
-    const completed = patientAppointments.filter(apt => apt.status === 'Completed').length;
-    const totalCost = patientAppointments
-      .filter(apt => apt.status === 'Completed')
-      .reduce((sum, apt) => sum + (parseFloat(apt.cost) || 0), 0);
-
-    return { upcoming, completed, totalCost, total: patientAppointments.length };
-  }, [patientAppointments]);
-
   // Verify access - patients can only view their own data
   if (user.role === 'Patient' && user.patientId !== actualPatientId) {
     return (
@@ -200,48 +187,19 @@ export default function PatientView({ patientId }) {
       <div className={`rounded-2xl p-6 shadow-lg ${
         isDarkMode ? 'bg-slate-800' : 'bg-white'
       }`}>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="flex items-center space-x-4">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
-              isDarkMode ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white'
-            }`}>
-              {patient.name.charAt(0)}
-            </div>
-            <div>
-              <h1 className={`text-2xl font-bold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>{patient.name}</h1>
-              <p className={`text-sm ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Patient Portal</p>
-            </div>
+        <div className="flex items-center space-x-4">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
+            isDarkMode ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white'
+          }`}>
+            {patient.name.charAt(0)}
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className={`text-center p-3 rounded-lg ${
-              isDarkMode ? 'bg-slate-700' : 'bg-blue-50'
-            }`}>
-              <p className="text-2xl font-bold text-blue-600">{stats.upcoming}</p>
-              <p className={`text-xs ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Upcoming</p>
-            </div>
-            <div className={`text-center p-3 rounded-lg ${
-              isDarkMode ? 'bg-slate-700' : 'bg-green-50'
-            }`}>
-              <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-              <p className={`text-xs ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Completed</p>
-            </div>
-            <div className={`text-center p-3 rounded-lg ${
-              isDarkMode ? 'bg-slate-700' : 'bg-amber-50'
-            }`}>
-              <p className="text-2xl font-bold text-amber-600">₹{stats.totalCost.toLocaleString()}</p>
-              <p className={`text-xs ${
-                isDarkMode ? 'text-slate-400' : 'text-gray-600'
-              }`}>Total Paid</p>
-            </div>
+          <div>
+            <h1 className={`text-2xl font-bold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>{patient.name}</h1>
+            <p className={`text-sm ${
+              isDarkMode ? 'text-slate-400' : 'text-gray-600'
+            }`}>Patient Portal</p>
           </div>
         </div>
       </div>
@@ -496,7 +454,7 @@ export default function PatientView({ patientId }) {
                           }`}>Attachments:</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {appointment.files.map((file, index) => (
-                              <FileViewer key={index} file={file} />
+                              <FileViewer key={index} file={file} isAdmin={user.role === 'Admin'} />
                             ))}
                           </div>
                         </div>
